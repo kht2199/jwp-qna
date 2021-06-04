@@ -1,4 +1,4 @@
-package qna.domain;
+package qna.domain.question;
 
 import java.util.Objects;
 
@@ -11,6 +11,9 @@ import javax.persistence.Table;
 
 import qna.NotFoundException;
 import qna.UnAuthorizedException;
+import qna.domain.UpdatableEntity;
+import qna.domain.User;
+import qna.domain.exception.question.AnswerOwnerNotMatchedException;
 
 @Entity
 @Table
@@ -58,10 +61,6 @@ public class Answer extends UpdatableEntity {
         return deleted;
     }
 
-    public void delete() {
-        this.deleted = true;
-    }
-
     @Override
     public String toString() {
         return "Answer{" +
@@ -71,5 +70,16 @@ public class Answer extends UpdatableEntity {
                 ", contents='" + contents + '\'' +
                 ", deleted=" + deleted +
                 '}';
+    }
+
+    public void deleteBy(User loginUser) throws AnswerOwnerNotMatchedException {
+        if (!isOwner(loginUser)) {
+            throw new AnswerOwnerNotMatchedException();
+        }
+        delete();
+    }
+
+    private void delete() {
+        this.deleted = true;
     }
 }
